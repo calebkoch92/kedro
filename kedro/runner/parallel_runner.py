@@ -338,6 +338,10 @@ class ParallelRunner(AbstractRunner):
                         self._suggest_resume_scenario(pipeline, done_nodes)
                         raise
                     done_nodes.add(node)
+                    self._logger.info("Completed node: %s", node.name)
+                    self._logger.info(
+                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                    )
 
                     # Decrement load counts, and release any datasets we
                     # have finished with. This is particularly important
