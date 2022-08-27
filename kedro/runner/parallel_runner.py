@@ -12,6 +12,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
+from tqdm import tqdm
 from typing import Any, Dict, Iterable, Set
 
 from pluggy import PluginManager
@@ -295,6 +296,7 @@ class ParallelRunner(AbstractRunner):
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)
+        progress_bar = tqdm(total=len(todo_nodes), position=0, leave=True)
 
         from kedro.framework.project import LOGGING, PACKAGE_NAME
 
@@ -342,6 +344,8 @@ class ParallelRunner(AbstractRunner):
                     self._logger.info(
                         "Completed %d out of %d tasks", len(done_nodes), len(nodes)
                     )
+                    print(f"Completed {len(done_nodes)} out of {len(nodes)} tasks")
+                    progress_bar.update()
 
                     # Decrement load counts, and release any datasets we
                     # have finished with. This is particularly important
@@ -359,3 +363,5 @@ class ParallelRunner(AbstractRunner):
                             and data_set not in pipeline.outputs()
                         ):
                             catalog.release(data_set)
+
+        progress_bar.close()
